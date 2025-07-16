@@ -282,6 +282,7 @@ namespace EcommerceApp.Services
             var order = await _context.Orders
             .AsNoTracking()
             .Include(o => o.Customer)
+            .Include (o => o.Address1)
             .Include(o => o.Payment)
             .Include(o => o.OrderItems)
             .ThenInclude(oi => oi.Product)
