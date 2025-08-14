@@ -23,11 +23,12 @@ namespace EcommerceApp.Models
         [Range(0, 100)]
         public int DiscountPercent { get; set; }
         public bool IsAvailable { get; set; }
+        public bool IsFeatured { get; set; }
 
         [Required]
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
-        public Category? Category { get; set; }
+        public Category Category { get; set; }
 
         public ICollection<OrderItem>? OrderItems { get; set; }
         public ICollection<Feedback>? Feedbacks { get; set; }

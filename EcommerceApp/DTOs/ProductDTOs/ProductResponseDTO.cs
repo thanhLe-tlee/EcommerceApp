@@ -11,5 +11,6 @@
         public int CategoryId { get; set; }
         public int DiscountPercent { get; set; }
         public bool IsAvailable { get; set; }
+        public bool IsFeatured { get; set; }
     }
 }

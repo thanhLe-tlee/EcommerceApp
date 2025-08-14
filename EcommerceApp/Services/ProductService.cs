@@ -4,6 +4,7 @@ using EcommerceApp.DTOs.ProductDTOs;
 using EcommerceApp.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 namespace EcommerceApp.Services
 {
     public class ProductService
@@ -35,7 +36,8 @@ namespace EcommerceApp.Services
                     ImageUrl = productDto.ImageUrl,
                     CategoryId = productDto.CategoryId,
                     DiscountPercent = productDto.DiscountPercent,
-                    IsAvailable = true
+                    IsAvailable = true,
+                    IsFeatured = false,
                 };
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
@@ -49,7 +51,8 @@ namespace EcommerceApp.Services
                     ImageUrl = product.ImageUrl,
                     CategoryId = product.CategoryId,
                     IsAvailable = product.IsAvailable,
-                    DiscountPercent = product.DiscountPercent
+                    DiscountPercent = product.DiscountPercent,
+                    IsFeatured = product.IsFeatured
                 };
                 return new ApiResponse<ProductResponseDTO>(200, productResponse);
             }
@@ -112,6 +115,7 @@ namespace EcommerceApp.Services
                 product.ImageUrl = productDto.ImageUrl;
                 product.CategoryId = productDto.CategoryId;
                 product.DiscountPercent = productDto.DiscountPercent;
+                product.IsFeatured = productDto.IsFeatured;
                 await _context.SaveChangesAsync();
                 var confirmationMessage = new ConfirmationResponseDTO
                 {
@@ -134,7 +138,7 @@ namespace EcommerceApp.Services
                 {
                     return new ApiResponse<ConfirmationResponseDTO>(404, "Product not found.");
                 }
-                _context.Products .Remove(product);
+                _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
                 var confirmationMessage = new ConfirmationResponseDTO
                 {
@@ -238,9 +242,9 @@ namespace EcommerceApp.Services
                 query = query.Where(p => p.Category.Name.ToLower() == categoryName.ToLower());
             }
 
-            if(minPrice != null)
+            if (minPrice != null)
             {
-                query = query.Where(p => p.Price >=  minPrice);
+                query = query.Where(p => p.Price >= minPrice);
             }
 
             if (maxPrice != null)
@@ -263,13 +267,89 @@ namespace EcommerceApp.Services
                 DiscountPercent = p.DiscountPercent,
             }).ToList();
 
-            if (result.Count == 0) 
+            if (result.Count == 0)
             {
                 return new ApiResponse<List<ProductResponseDTO>>(404, "Product not found");
             }
 
             return new ApiResponse<List<ProductResponseDTO>>(200, productList);
-            
+
         }
+
+        public async Task<ApiResponse<List<ProductResponseDTO>>> GetFeaturedProductAsync(bool isFeatured)
+        {
+            try
+            {
+                var products = await _context.Products
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Where(p => p.IsFeatured == isFeatured && p.IsAvailable)
+                .ToListAsync();
+                if (products == null || products.Count == 0)
+                {
+                    return new ApiResponse<List<ProductResponseDTO>>(404, "Products not found.");
+                }
+                var productList = products.Select(p => new ProductResponseDTO
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    ImageUrl = p.ImageUrl,
+                    CategoryId = p.CategoryId,
+                    IsAvailable = p.IsAvailable,
+                    DiscountPercent = p.DiscountPercent,
+                }).ToList();
+                return new ApiResponse<List<ProductResponseDTO>>(200, productList);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<ProductResponseDTO>>(500, $"An unexpected error occurred while processing your request, Error: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<PaginatedResponseDTO<ProductResponseDTO>>> GetProductsPaginatedAsync(PaginationDTO pagination)
+        {
+            try
+            {
+                IQueryable<Product> query = _context.Products.Include(p => p.Category).AsNoTracking();
+                var totalCount = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pagination.PageSize);
+
+                var items = await query.Skip((pagination.PageNumber - 1) * pagination.PageSize).Take(pagination.PageSize).ToListAsync();
+
+                var productDTOs = items.Select(p => new ProductResponseDTO
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    ImageUrl = p.ImageUrl,
+                    CategoryId = p.CategoryId,
+                    IsAvailable = p.IsAvailable,
+                    DiscountPercent = p.DiscountPercent,
+                    IsFeatured = p.IsFeatured
+                }).ToList();
+
+                var paginatedResponse = new PaginatedResponseDTO<ProductResponseDTO>
+                {
+                    Items = productDTOs,
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalPages = totalPages,
+                    TotalCount = totalCount
+                };
+
+                return new ApiResponse<PaginatedResponseDTO<ProductResponseDTO>>(200, paginatedResponse);
+            }
+            catch (Exception ex) 
+            {
+                return new ApiResponse<PaginatedResponseDTO<ProductResponseDTO>>(500,
+            $"An unexpected error occurred while processing your request, Error: {ex.Message}");
+            }
+        }
+
     }
 }

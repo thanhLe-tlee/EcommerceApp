@@ -11,9 +11,11 @@ namespace EcommerceApp.Controllers
     public class CartsController : ControllerBase
     {
         private readonly ShoppingCartService _shoppingCartService;
-        public CartsController(ShoppingCartService shoppingCartService)
+        private readonly CookieCartService _cookieCartService;
+        public CartsController(ShoppingCartService shoppingCartService, CookieCartService cookieCartService)
         {
             _shoppingCartService = shoppingCartService;
+            _cookieCartService = cookieCartService;
         }
 
         [HttpGet("GetCart/{customerId}")]
@@ -65,6 +67,61 @@ namespace EcommerceApp.Controllers
         {
             var response = await _shoppingCartService.ClearCartAsync(customerId);
             if (response.StatusCode != 200)
+            {
+                return StatusCode(response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        // New endpoints for cookie-based cart (anonymous users)
+        [HttpGet("cookie")]
+        public ActionResult<List<CookieCartDTO>> GetCookieCart()
+        {
+            return Ok(_cookieCartService.GetCart());
+        }
+
+        [HttpPost("cookie/add")]
+        public async Task<ActionResult<ApiResponse<ConfirmationResponseDTO>>> AddToCookieCart(
+            [FromQuery] int productId,
+            [FromQuery] int quantity)
+        {
+            var response = await _cookieCartService.AddToCart(productId, quantity);
+            if (!response.Success)
+            {
+                return StatusCode(response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [HttpPut("cookie/update")]
+        public ActionResult<ApiResponse<ConfirmationResponseDTO>> UpdateCookieCartItem(
+            [FromQuery] int productId,
+            [FromQuery] int quantity)
+        {
+            var response = _cookieCartService.UpdateCartItemQuantity(productId, quantity);
+            if (!response.Success)
+            {
+                return StatusCode(response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [HttpDelete("cookie/remove/{productId}")]
+        public ActionResult<ApiResponse<ConfirmationResponseDTO>> RemoveFromCookieCart(int productId)
+        {
+            var response = _cookieCartService.RemoveFromCart(productId);
+            if (!response.Success)
+            {
+                return StatusCode(response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [HttpDelete("cookie/clear")]
+        public ActionResult<ApiResponse<ConfirmationResponseDTO>> ClearCookieCart()
+        {
+            var response = _cookieCartService.ClearCart();
+            if (!response.Success)
             {
                 return StatusCode(response.StatusCode, response);
             }

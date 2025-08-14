@@ -1,6 +1,8 @@
 ﻿using EcommerceApp.DTOs;
 using EcommerceApp.DTOs.ProductDTOs;
+using EcommerceApp.Models;
 using EcommerceApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -92,6 +94,38 @@ namespace EcommerceApp.Controllers
                 return StatusCode(response.StatusCode, response);
             }
             return Ok(response);
+        }
+
+        [HttpGet("GetFeaturedProducts")]
+        public async Task<ActionResult<ApiResponse<List<ProductResponseDTO>>>> GetFeaturedProduct(bool isFeatured)
+        {
+            var response = await _productService.GetFeaturedProductAsync(isFeatured);
+            if (response.StatusCode != 200)
+            {
+                return StatusCode(response.StatusCode, response);
+            }
+            return Ok(response);
+        }
+
+        [HttpGet("GetProductWithPagination")]
+        public async Task<ActionResult<ApiResponse<PaginatedResponseDTO<ProductResponseDTO>>>> GetPaginatedProducts(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var pagination = new PaginationDTO
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var response = await _productService.GetProductsPaginatedAsync(pagination);
+
+            if (response.Success)
+            {
+                return Ok(response);
+            }
+
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

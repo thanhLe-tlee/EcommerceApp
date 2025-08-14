@@ -20,5 +20,7 @@ namespace EcommerceApp.DTOs.ProductDTOs
         public int DiscountPercent{ get; set; }
         [Required(ErrorMessage = "Category ID is required.")]
         public int CategoryId { get; set; }
+
+        public bool IsFeatured { get; set; }
     }
 }

@@ -8,5 +8,7 @@ namespace EcommerceApp.DTOs.ProductDTOs
         public int ProductId { get; set; }
         [Required(ErrorMessage = "IsAvailable is required.")]
         public bool IsAvailable { get; set; }
+
+        public bool IsFeatured { get; set; }
     }
 }

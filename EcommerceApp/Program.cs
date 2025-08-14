@@ -1,6 +1,8 @@
 using EcommerceApp.Data;
 using EcommerceApp.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 
 namespace EcommerceApp
 {
@@ -15,16 +17,30 @@ namespace EcommerceApp
             builder.Services.AddControllers()
             .AddJsonOptions(options =>
             {
-                // This will use the property names as defined in the C# model
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
             });
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularDev",
+                    policy => policy.WithOrigins("http://localhost:4200")
+                                    .AllowAnyHeader()
+                                    .AllowAnyMethod());
+            });
+    //        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    //.AddJwtBearer(options =>
+    //{
+    //    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    //    {
+    //        // Configure your token validation parameters here
 
+    //    };
+    //});
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreDBConnection")));
-            
+       
             builder.Services.AddScoped<CustomerService>();
             builder.Services.AddScoped<AddressService>();
             builder.Services.AddScoped<CategoryService>();
@@ -33,9 +49,12 @@ namespace EcommerceApp
             builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<PaymentService>();
             builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<CookieCartService>();
             builder.Services.AddHostedService<PendingPaymentService>();
 
+            builder.Services.AddHttpContextAccessor();
             var app = builder.Build();
+            app.UseCors("AllowAngularDev");
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
