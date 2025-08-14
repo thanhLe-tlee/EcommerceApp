@@ -40,7 +40,6 @@ namespace EcommerceApp.Services
                         // Allow retry only if previous payment failed and order status is still Pending
                         if (order.Payment.Status == PaymentStatus.Failed && order.OrderStatus == OrderStatus.Pending)
                         {
-                            // Retry: update the existing payment record with new details
                             payment = order.Payment;
                             payment.PaymentMethod = paymentRequest.PaymentMethod;
                             payment.Amount = paymentRequest.Amount;
@@ -83,7 +82,7 @@ namespace EcommerceApp.Services
                     else
                     {
                         // For COD, mark the order status as Processing immediately
-                        order.OrderStatus = OrderStatus.Processing;
+                        order.OrderStatus = OrderStatus.Shipped;
                     }
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();

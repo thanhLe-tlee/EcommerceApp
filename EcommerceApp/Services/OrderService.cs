@@ -158,13 +158,9 @@ namespace EcommerceApp.Services
                 var currentStatus = order.OrderStatus;
                 var newStatus = statusDto.OrderStatus;
                 // Validate the status transition.
-                if (!AllowedStatusTransitions.TryGetValue(currentStatus, out var allowedStatuses))
+                if (!AllowedStatusTransitions.TryGetValue(newStatus, out var allowedStatuses))
                 {
                     return new ApiResponse<ConfirmationResponseDTO>(500, "Current order status is invalid.");
-                }
-                if (!allowedStatuses.Contains(newStatus))
-                {
-                    return new ApiResponse<ConfirmationResponseDTO>(400, $"Cannot change order status from {currentStatus} to {newStatus}.");
                 }
                 // Update the order status.
                 order.OrderStatus = newStatus;
