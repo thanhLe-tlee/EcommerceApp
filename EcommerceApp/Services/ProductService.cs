@@ -311,7 +311,7 @@ namespace EcommerceApp.Services
 
         public async Task<ApiResponse<PaginatedResponseDTO<ProductResponseDTO>>> GetProductsPaginatedAsync(PaginationDTO pagination)
         {
-            try
+            try  
             {
                 IQueryable<Product> query = _context.Products.Include(p => p.Category).AsNoTracking();
                 var totalCount = await query.CountAsync();

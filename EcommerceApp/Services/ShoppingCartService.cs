@@ -15,7 +15,7 @@ namespace EcommerceApp.Services
         }
         // Retrieves the active (non-checked-out) cart for a given customer.
         // If no active cart exists, an empty cart (with price details set to 0) is returned.
-        public async Task<ApiResponse<CartResponseDTO>> GetCartByCustomerIdAsync(int customerId)
+        public async Task<ApiResponse<CartResponseDTO>> GetCartByCustomerIdAsync(int customerId) 
         {
             try
             {

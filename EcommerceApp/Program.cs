@@ -29,15 +29,14 @@ namespace EcommerceApp
                                     .AllowAnyHeader()
                                     .AllowAnyMethod());
             });
-    //        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    //.AddJwtBearer(options =>
-    //{
-    //    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    //    {
-    //        // Configure your token validation parameters here
-
-    //    };
-    //});
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            // update later
+        };
+    });
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreDBConnection")));
        

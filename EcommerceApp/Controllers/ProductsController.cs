@@ -13,7 +13,7 @@ namespace EcommerceApp.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly ProductService _productService;
-
+        
         public ProductsController(ProductService productService)
         {
             _productService = productService;

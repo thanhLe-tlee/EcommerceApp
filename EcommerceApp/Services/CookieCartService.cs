@@ -9,7 +9,7 @@ namespace EcommerceApp.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ProductService _productService;
-        private const string CartCookieName = "ShoppingCart";
+        private const string CartCookieName = "ShoppingCart"; 
 
         public CookieCartService(IHttpContextAccessor httpContextAccessor, ProductService productService)
         {

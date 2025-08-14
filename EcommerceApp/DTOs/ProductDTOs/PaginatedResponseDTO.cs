@@ -8,6 +8,6 @@
         public int TotalPages { get; set; }
         public int TotalCount { get; set; }
         public bool HasPrevious => PageNumber > 1;
-        public bool HasNext => PageNumber < TotalPages;
+        public bool HasNext => PageNumber < TotalPages; 
     }
 }
